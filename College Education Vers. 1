@@ -1,0 +1,567 @@
+<html>
+<head>
+/*CS 5764 Information Visualization */
+/* Team VizMark TM */
+/* Team Members: Moeti Masiane */
+/*				Mauricio De la Barra */
+/*				Tomilayo Komolafe */
+
+/* This project involves representing 4 data attributes; Gross Domestic Product (GDP), Starting 
+Salary for a market segment, Median salary for a market segment, and Graduation from college
+for each market segment, in a systematic manner that will allow an end user to explore relationships
+between these four attributes. The visualization is in the form of a scatter plot with interactive
+features imbedded in the scatter plot. The ensuing code creates our visualization*/
+
+
+/* Title of Visualization */
+<title>College Education Data</title>
+
+/* D3 Library for inputing animations */
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+/* Lab Rat Revenge is a library to assist in our visual encoding */
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+/* JQuery is used in our code to assist in the use of Javascript */
+<script src="http://code.jquery.com/jquery.js"></script>
+
+/* We use Bootstraps collection of tools in our implementation of the styles used in our visualization */
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<style type = "text/css">
+	.axis path,
+	.axis line {
+		fill: none;
+		stroke: black;
+		shape-rendering: crispEdges;
+	}
+
+	.axis text {
+		font-family: sans-serif;
+		font-size: 15px;
+		fill: black;
+	}
+	
+	.d3-tip {
+	  line-height: 1;
+	  font-weight: bold;
+	  padding: 12px;
+	  background: rgba(0, 0, 0, 0.5);
+	  color: #fff;
+	  border-radius: 2px;
+	}
+
+	.d3-tip:after {
+	  box-sizing: border-box;
+	  display: inline;
+	  font-size: 10px;
+	  width: 100%;
+	  line-height: 1;
+	  color: rgba(0, 0, 0, 0.5);
+	  content: "\25BC";
+	  position: absolute;
+	  text-align: center;
+	}
+
+	.d3-tip.n:after {
+	  margin: -1px 0 0 0;
+	  top: 100%;
+	  left: 0;
+	}
+	
+	.slider{
+	  fill: #f00;
+	  stroke-width: 20px;
+	  stroke-linecap: round;
+	  width: 40%;
+	}
+	
+	.yearLabel{
+	  font-family: sans-serif;
+		font-size: 45px;
+		color: red;
+	}
+
+</style>
+</head>
+	
+	<body>
+	
+		<div class="row" id="titleRow">
+		<div class="col-md-2" id="heading" style="padding-left: 80px">
+			
+			
+		</div>
+		<div class="col-md-6" id="headingLeftPad" style="padding-left: 80px">
+			<h1>VizMark-TM - 2015. College Data Visualization</h1>
+		</div>
+	</div>
+	<div class="row" id="topRow">
+		<div class="col-md-2" id="leftYear" style="padding-left: 80px">
+			
+		</div>
+		<div class="col-md-6" id="rightYear" style="padding-left: 380px; fill: red;">
+		</div>
+	</div>
+	<div class="row" id="middleRow">
+		<div class="col-md-2" id="area1" style="padding-left: 80px; margin-top: 150px;">
+			<h4 style = "background-color: yellow">Select dimension to plot against graduation values:</h4>
+			<select name="y-axis1" id="y-axis1">
+				  <option value="GDP">GDP</option>
+				  <option value="STARTINGSALARY">Starting Income</option>
+				  <option value="MEDIANSALARY">Median Income</option>
+			</select>
+		</div>
+		<div class="col-md-6" id="area2"></div>
+	</div>
+	<div class="row" id="bottomRow">
+		<div class="col-md-2" id="leftFooter" >
+			
+		</div>
+		<div class="col-md-6" id="rightFooter" style="padding-left: 84px"></div>
+	</div>
+		
+		<script type="text/javascript">
+		
+		/* Below is the entire data set used in creating the visualization. It is input in a dictionary format for ease of referencing in the initial implementation
+		of the code. We hard coded all data sets intially and we will be looking into hosting our data via a web host server in the future */
+			var collegeData2001 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2002 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2003 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2004 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+				var collegeData2005 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2006 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2007 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2008 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+				var collegeData2009 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2010 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2011 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2012 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2013 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2014 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			var collegeData2015 = [{"Industry": "Finance Industry", "StartingSalary": 48000,  "MedianSalary": 96000,  "GDP": 750436, "Degrees": 783}, 
+				{"Industry": "Manufacturing & Engineerng", "StartingSalary": 49000,  "MedianSalary": 98000, "GDP": 1555335, "Degrees": 58261}, 
+				{"Industry": "Architecture and Real Estate Industry", "StartingSalary": 50000,  "MedianSalary": 100000, "GDP": 1241947, "Degrees": 8480}, 
+				{"Industry": "Arts and Entertainment", "StartingSalary": 51000, "MedianSalary": 102000, "GDP": 98977, "Degrees": 67308}, 
+				{"Industry": "Healthcare and Related Industry", "StartingSalary": 52000, "MedianSalary": 104000, "GDP": 595381, "Degrees": 136509}, 
+				{"Industry": "Management", "StartingSalary": 53000, "MedianSalary": 106000, "GDP": 173206, "Degrees": 263515}, 
+				{"Industry": "Agriculture Industry", "StartingSalary": 54000, "MedianSalary": 108000, "GDP": 98517, "Degrees": 23370}, 
+				{"Industry": "Environmental Health and Safety", "StartingSalary": 55000, "MedianSalary": 110000, "GDP": 281938, "Degrees": 19447}, 
+				{"Industry": "Infrastructure and Related Fields", "StartingSalary": 56000, "MedianSalary": 112000, "GDP": 321252, "Degrees": 14660}, 
+				{"Industry": "Communication Services", "StartingSalary": 57000, "MedianSalary": 114000, "GDP": 279926, "Degrees": 125888}, 
+				{"Industry": "Information Technology Industry", "StartingSalary": 58000, "MedianSalary": 116000, "GDP": 472222, "Degrees": 44142}, 
+				{"Industry": "Legal and Related Industries", "StartingSalary": 59000, "MedianSalary": 118000, "GDP": 906866, "Degrees": 27202}, 
+				{"Industry": "Economic and Marketing", "StartingSalary": 60000, "MedianSalary": 120000, "GDP": 695614, "Degrees": 16421}, 
+				{"Industry": "Education Industry", "StartingSalary": 61000, "MedianSalary": 122000, "GDP": 86067, "Degrees": 105458}, 
+				{"Industry": "Natural Sciences", "StartingSalary": 62000, "MedianSalary": 124000, "GDP": 110473, "Degrees": 26478}, 
+				{"Industry": "Professional Scientific and Technical Service Industry", "StartingSalary": 63000, "MedianSalary": 100026, "GDP": 656024, "Degrees": 29196}, 
+				{"Industry": "Supply Chain and Logistics", "StartingSalary": 64000, "MedianSalary": 128000, "GDP": 305615, "Degrees": 3748}, 
+				{"Industry": "Political Science Field", "StartingSalary": 65000, "MedianSalary": 130000, "GDP": 421902, "Degrees": 37962}];
+			
+			/* We set up the variables that will be displayed or manipulated during the visualization here */
+			var inputData = collegeData2001;
+			var width = 800;
+			var height = 600;
+			var radius = 8;
+			var toppad = 100
+			var rightpad = 20;
+			var bottompad = 40;
+			var leftpad = 80;
+			var shiftTextDown = 20;
+			var INDUSTRY = 0;
+			var STARTINGSALARY = 1;
+			var MEDIANSALARY = 2;
+			var GDP = 3;
+			var DEGREES = 4;
+			var yColumn = d3.select("#y-axis1").node().value;
+			var xColumn = "Degrees";
+			var rColumn = "StartingSalary";
+			var nameColumn = "Industry";
+			var colorColumn = "Industry";
+			
+			/* We declare the color map that will be used in differentiating between the categorical variables */
+			var dotColor = d3.scale.category20();
+
+
+			/* This will be used to calculate the maximum and minimum values for our axis */
+			var xScale = d3.scale.linear()
+				.domain([0, d3.max(inputData, function(d){return d[xColumn];})])
+				.range([0, width - (leftpad + rightpad)]);
+			var yScale = d3.scale.linear()
+				.domain([0, d3.max(inputData, function(d){return d[yColumn];})])
+				.range([height - (toppad + bottompad), 10]);
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(3);
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			var rMin = d3.min(inputData, function(d){return d[rColumn];});
+			var rMax = d3.max(inputData, function(d){return d[rColumn];});
+			var rScale = d3.scale.linear().range([rMin, rMax]);
+			rScale.domain(d3.extent(inputData, function (d){return d[rColumn];}));
+			
+
+			/* We describe the function that will be used to draw our scatter plot. We also introduce all the relevant
+			styles here that the user will perceive */
+			function drawScatterGraph(data){
+				
+				var tip = d3.tip()
+				  .attr('class', 'd3-tip')
+				  .offset([0, 10])
+				  .html(function(d) {
+					return "<strong>Industry:</strong> <span style='color:red'>" + d["Industry"] + "</span><br><strong>GDP:</strong> <span style='color:red'>" + d["GDP"] + "</span><br><strong>Number of Graduates:</strong> <span style='color:red'>" + d["Degrees"] + "</span><br><strong>Starting Salary:</strong> <span style='color:red'>" + d["StartingSalary"] + "</span><br><strong>Mid-Career Salary:</strong> <span style='color:red'>" + d["MedianSalary"] + "</span>";
+				  })
+				
+				/* We declare the height and width of the vizualization space */
+				var svg = d3.select("#area2").append("svg")
+					.attr("width", width)
+					.attr("height", height);
+				
+				/* We declare the circles that will act as our scatter plot points in our visualization */
+				var circles = svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle");
+				
+				/*We include the labeling for the circles as we intend for users to be able to hover over a data point 
+				and retrieve more detailed information about that point of interest */
+				circles.attr("cx", function(d){return xScale(d[xColumn]);})
+					.attr("cy", function(d){return yScale(d[yColumn]);})
+					.attr("r", function(d){return Math.log(rScale(d[rColumn]))})
+					.attr("name", function(d){return d[nameColumn];})
+					.attr("fill", function(d){return dotColor(d[colorColumn]);})
+					.attr("transform", "translate("+leftpad+", "+(toppad)+")")
+					.on("mouseover", tip.show)
+					.on("mouseout", tip.hide);
+					
+				circles.call(tip);
+				
+				
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate("+leftpad+", "+(height-bottompad)+")")
+					.call(xAxis);
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate("+leftpad+", "+(toppad)+")")
+					.call(yAxis);
+					
+					//circles.exit().remove();
+					
+			}
+			
+			/* We create a function for a 'years' slider that animates through our multidimensional space. 
+			The user can then observe 3 dimensions interact while viewing the interaction through time */
+			function createSlider(){
+				var width = 450;
+				var height = 300;
+				
+				
+				
+				/*var years = ["2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2012", "2013", "2014", "2015"];*/
+				var years = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012, 2013, 2014, 2015];
+				var sliderScale = d3.scale.linear()
+					.domain([d3.min(years, function(d){return d;}), d3.max(years, function(d){return d;})])
+					.range([0, width])
+					.clamp(true);
+				var reverseYear = d3.scale.linear()
+					.domain([0, 400])
+					.range([2001, 2015]);
+				
+				
+				/* We create the slider here */
+				var svg1 = d3.selectAll("#rightFooter").append("svg1")
+					.attr("width", 600)
+					.attr("height", 200);
+				svg1.append("br");
+				svg1.append("label")
+					.attr("text", "Year: ");
+				svg1.append("input")
+					.attr("type", "range")
+					.attr("class", "slider")
+					.attr("min", 0)
+					.attr("max", 400)
+					.attr("id", "slider")
+					.attr("width", "45")
+					.attr("transform", "translate(40, 60)");
+					//.call(sliderAxis);
+					//svg.append("br");
+				var svg2 = d3.selectAll("#rightYear").append("svg2")
+					.attr("width", 600)
+					.attr("height", 60);
+				var textYear = svg2.append("text")
+					.attr("stroke", "black")
+					.text("2008")
+					.attr("x", 80)
+					.attr("y", 60)
+					.attr("width", "20px")
+					.attr("fill", "black")
+					.attr("class", "yearLabel")
+					.attr("text-align", "center")
+					;
+					
+					//svg1.append("br");
+					//
+					//svg.append("g")
+					//	.attr("class", "sliderAxis")
+					//	.attr("transform", "translate(40, 60)");
+						//.call(sliderAxis);
+						
+					d3.select("#slider")
+						.on("input", function(){
+							console.log("slider moved to: "+this.value); 
+							textYear.text(Math.round(reverseYear(this.value)));
+							//inputData = "collegeData"+Math.round(reverseYear(this.value));
+							//drawScatterGraph();
+							});
+			}
+			
+			drawScatterGraph(inputData);
+			//drawScatterGraph(inputData);
+			createSlider();
+		</script>
+	
+	</body>
+</html>

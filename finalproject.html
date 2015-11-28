@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <!--CS 5764 Information Visualization 
  Team VizMark TM 
@@ -726,7 +726,10 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
         });
 
         /* Y-axis label transition */
-        svg.selectAll(".y.axis").selectAll("text.ylabel").text(axisNames[yAxy] + " ($)");
+        svg.selectAll(".y.axis")
+        	.selectAll("text.ylabel")
+        	.text(axisNames[yAxy] === "GDP" ? axisNames[yAxy] + " Millions ($)"
+        		: axisNames[yAxy] + " ($)");
 			}
 			 
 			drawScatterGraph(inputData);

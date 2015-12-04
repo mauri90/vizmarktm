@@ -21,6 +21,9 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 <!-- D3 Library for inputing animations -->
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
+<script src="d3pie.min.js" charset="utf-8"></script>
+
+
 <!-- Lab Rat Revenge is a library to assist in our visual encoding -->
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
@@ -53,7 +56,16 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 	  border-radius: 2px;
 	}
 
-	/* Inverted traingle for the tooltip */
+	/*.d3-tip2 {
+	  line-height: 1;
+	  font-weight: bold;
+	  padding: 8px;
+	  background: rgba(0, 0, 0, 0.4);
+	  color: #fff;
+	  border-radius: 2px;
+	}*/
+
+	/* Inverted triangle for the tooltip */
 	.d3-tip:after {
 	  box-sizing: border-box;
 	  display: inline;
@@ -66,11 +78,30 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 	  text-align: center;
 	}
 
+	/* Inverted triangle for the tooltip */
+	/*.d3-tip2:after {
+	  box-sizing: border-box;
+	  display: inline;
+	  font-size: 10px;
+	  width: 100%;
+	  line-height: 1;
+	  color: rgba(0, 0, 0, 0.4);
+	  content: "\25B2";
+	  position: absolute;
+	  text-align: center;
+	}*/
+
 	.d3-tip.n:after {
 	  margin: -1px 0 0 0;
 	  top: 100%;
 	  left: 0;
 	}
+
+	/*.d3-tip2.n:after {
+	  margin: -40px 0 0 0;
+	  top: 100%;
+	  left: 0;
+	}*/
 	
 	.slider{
 	  fill: #f00;
@@ -93,6 +124,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 </head>
 	
 	<body>
+		
 	
 		<div class="row" id="titleRow">
 		<div class="col-md-2" id="heading" style="padding-left: 80px">
@@ -127,6 +159,8 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 		</div>
 		<div class="col-md-6" id="rightFooter" style="padding-left: 84px"></div>
 	</div>
+
+	<div id="chart"></div>
 		
 		<script type="text/javascript">
 
@@ -503,8 +537,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 			function drawScatterGraph(data){
 				yScale.domain([0, d3.max(inputData, function(d){return d[yColumn];})])
 					.range([height - (toppad + bottompad), 10])
-					.nice()
-					;
+					.nice();
 
 				var tip = d3.tip()
 				  .attr('class', 'd3-tip')
@@ -512,7 +545,61 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				  .offset([-10, 0])
 				  .html(function(d) {
 					return "<strong>Industry:</strong> <span style='color:red'>" + d["Industry"] + "</span><br><strong>GDP:</strong> <span style='color:red'>" + d["GDP"] + "</span><br><strong>Number of Graduates:</strong> <span style='color:red'>" + d["Degrees"] + "</span><br><strong>Starting Salary:</strong> <span style='color:red'>" + d["StartingSalary"] + "</span><br><strong>Mid-Career Salary:</strong> <span style='color:red'>" + d["MedianSalary"] + "</span>";
-				  })
+				  });
+
+				/*var tip2 = d3.tip()
+				  .attr('class', 'd3-tip2')
+				  .offset([55, 0])
+				  .html(function(d) {
+					return "Test";
+				  });*/
+
+			 /*var pieRadius = 100;
+			 var tooltip = d3.select("body")
+			 	.append("svg:svg")
+			 	.append('g')
+			 	.style("position", "absolute")
+			 	.style("z-index", "10")
+			 	.style("visibility", "hidden")
+			 	.html(function(d){
+			 		return
+			 	});*/
+
+				var pieWidth = 200;
+				var pieHeight = 200;
+				var pieRadius = Math.min(pieWidth, pieHeight) / 2;
+
+				var tooltip = d3.select("body")
+					.append("div")
+					.attr("class", "pie")
+					.style("position", "absolute")
+					.style("z-index", "10");
+
+				var svgPie = d3.select(".pie")
+				  .append('svg')
+				  .attr('width', pieWidth)
+				  .attr('height', pieHeight)
+				  .append('g')
+				  .attr('transform', 'translate(' + (pieWidth / 2) + 
+				    ',' + (pieHeight / 2) + ')')
+				  .style("visibility", "hidden");
+
+				var arc = d3.svg.arc()
+				  .outerRadius(pieRadius);
+
+				var pie = d3.layout.pie()
+				  .value(function(d) { return d["Degrees"]; })
+				  .sort(null);
+
+				var path = svgPie.selectAll('path')
+				  .data(pie(data))
+				  .enter()
+				  .append('path')
+				  .attr('d', arc)
+				  .attr('fill', function(d, i) { 
+				    return dotColor(d.data["Industry"]);
+				  });
+
 				
 				/*svg.select("axis").call(yAxis);*/
 				
@@ -533,10 +620,26 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.attr("name", function(d){return d[nameColumn];})
 					.attr("fill", function(d){return dotColor(d[colorColumn]);})
 					.attr("transform", "translate("+leftpad+", "+(toppad)+")")
-					.on("mouseover", tip.show)
-					.on("mouseout", tip.hide);
+					.on("mouseover", function(d){
+							svgPie.style("visibility", "visible");
+							tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-95)+"px");
+							tip.show(d);
+							/*tip2.show(d);*/
+						})
+					.on("mousemove", function(){
+						// var xPos = event.pageX;
+						// var yPos = event.pageY;
+						// console.log(xPos + " " + yPos);
+						// return tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-90)+"px");
+						})
+					.on("mouseout", function(d){
+							svgPie.style("visibility", "hidden");
+							tip.hide(d);
+							/*tip2.hide(d);*/
+						});
 					
 				circles.call(tip);
+				/*circles.call(tip2);*/
 				
 				/* Creating X-axis */
 				svg.append("g")

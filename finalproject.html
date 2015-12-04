@@ -699,7 +699,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.attr("transform", "translate("+leftpad+", "+(toppad)+")")
 					.on("mouseover", function(d){
 							svgPie.style("visibility", "visible");
-							// tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-95)+"px");
+							/* tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-95)+"px"); */
 							tooltip.style("top", (height/2)+"px").style("left",(width/2)+"px");
 							tip.show(d);
 							/*tip2.show(d);*/

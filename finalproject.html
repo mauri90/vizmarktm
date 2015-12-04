@@ -156,8 +156,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 		</div>
 		<div class="col-md-6" id="rightFooter" style="padding-left: 84px"></div>
 	</div>
-
-	<div id="chart"></div>
 		
 		<script type="text/javascript">
 
@@ -283,7 +281,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				{"Industry": "Supply Chain and Logistics","StartingSalary": 53913.93,"MedianSalary": 86450.19,"GDP": 375119.00,"Degrees": 5349.00},
 				{"Industry": "Political Science Field","StartingSalary": 37119.56,"MedianSalary": 70182.86,"GDP": 550354.00,"Degrees": 44898.00}];
 
-
 			var collegeData2006 = [{"Industry": "Finance Industry","StartingSalary": 43181.43,"MedianSalary": 75172.73,"GDP": 1048838.00,"Degrees": 0.00},
 				{"Industry": "Manufacturing & Engineerng","StartingSalary": 56386.47,"MedianSalary": 99434.40,"GDP": 1804221.00,"Degrees": 67065.00},
 				{"Industry": "Architecture and Real Estate Industry","StartingSalary": 40038.66,"MedianSalary": 71876.43,"GDP": 1721869.00,"Degrees": 9717.00},
@@ -321,7 +318,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				{"Industry": "Professional, Scientific, and Technical Service Industry","StartingSalary": 38246.88,"MedianSalary": 78942.55,"GDP": 967317.00,"Degrees": 37371.00},
 				{"Industry": "Supply Chain and Logistics","StartingSalary": 57312.22,"MedianSalary": 87387.86,"GDP": 409597.00,"Degrees": 5203.00},
 				{"Industry": "Political Science Field","StartingSalary": 39375.75,"MedianSalary": 73020.64,"GDP": 602350.00,"Degrees": 46940.00}];
-
 
 			var collegeData2008 = [{"Industry": "Finance Industry","StartingSalary": 46950.00,"MedianSalary": 82700.00,"GDP": 907226.00,"Degrees": 0.00},
 				{"Industry": "Manufacturing & Engineerng","StartingSalary": 57275.00,"MedianSalary": 99725.00,"GDP": 1814120.00,"Degrees": 68995.00},
@@ -436,7 +432,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				{"Industry": "Professional, Scientific, and Technical Service Industry","StartingSalary": 39766.67,"MedianSalary": 66266.67,"GDP": 1154791.00,"Degrees": 48016.23},
 				{"Industry": "Supply Chain and Logistics","StartingSalary": 59900.00,"MedianSalary": 91200.00,"GDP": 481439.00,"Degrees": 5067.86},
 				{"Industry": "Political Science Field","StartingSalary": 40300.00,"MedianSalary": 74700.00,"GDP": 704304.00,"Degrees": 49621.78}];
-
 
 			var collegeData2014 = [{"Industry": "Finance Industry","StartingSalary": 47250.00,"MedianSalary": 81000.00,"GDP": 1261274.00,"Degrees": 0.00},
 				{"Industry": "Manufacturing & Engineerng","StartingSalary": 61250.00,"MedianSalary": 106175.00,"GDP": 2090709.00,"Degrees": 89695.75},
@@ -553,12 +548,10 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				{"Industry": "Supply Chain and Logistics","StartingSalary": 78736.93315,"MedianSalary": 102244.74,"GDP": 572353.01,"Degrees": 5716.37},
 				{"Industry": "Political Science Field","StartingSalary": 53380.65621,"MedianSalary": 80892.42,"GDP": 838457.14,"Degrees": 57150.27}];
 
-
-
 			/* We set up the variables that will be displayed or manipulated during the visualization here */
 			var inputData = collegeData2019;
 			var width = 850;
-			var height = 600;
+			var height = 550;
 			var radius = 20;
 			var toppad = 10;
 			var rightpad = 85;
@@ -597,8 +590,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 			var yAxis = d3.svg.axis()
 				.scale(yScale)
 				.orient("left")
-				.ticks(8)
-				;
+				.ticks(8);
 			var rMin = d3.min(inputData, function(d){return d[rColumn];});
 			var rMax = d3.max(inputData, function(d){return d[rColumn];});
 			var rScale = d3.scale.linear().range([rMin, rMax]);
@@ -705,10 +697,10 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 							/*tip2.show(d);*/
 						})
 					.on("mousemove", function(){
-						// var xPos = event.pageX;
-						// var yPos = event.pageY;
-						// console.log(xPos + " " + yPos);
-						// return tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-90)+"px");
+						/*var xPos = event.pageX;
+						var yPos = event.pageY;
+						console.log(xPos + " " + yPos);
+						return tooltip.style("top", (event.pageY+15)+"px").style("left",(event.pageX-90)+"px");*/
 						})
 					.on("mouseout", function(d){
 							svgPie.style("visibility", "hidden");
@@ -909,8 +901,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 
 				/* Y-axis tick marks transition */
         yScale.domain(d3.extent(inputData, function(d) { return d[yAxy]; }))
-        	.nice()
-        	;        
+        	.nice();        
         svg.select(".y.axis").transition().duration(800).call(yAxis);
 
         /* Data circles transition */

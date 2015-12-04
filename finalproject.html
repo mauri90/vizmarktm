@@ -524,7 +524,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 
 
 			/* We set up the variables that will be displayed or manipulated during the visualization here */
-			var inputData = collegeData2012;
+			var inputData = collegeData2019;
 			var width = 850;
 			var height = 600;
 			var radius = 20;
@@ -550,10 +550,11 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 
 			/* This will be used to calculate the maximum and minimum values for our axes */
 			var xScale = d3.scale.linear()
-				/*.domain([0, d3.max(inputData, function(d){return d[xColumn];})])*/
-				.domain(d3.extent(inputData, function(d){return d[xColumn];}))
+				.domain([0, d3.max(inputData, function(d){return d[xColumn];})])
+				/*.domain(d3.extent(inputData, function(d){return d[xColumn];})) */
 				.range([0, width - (leftpad + rightpad)])
 				.nice();
+
 			var yScale = d3.scale.linear();
 
 			var xAxis = d3.svg.axis()
@@ -623,7 +624,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.call(xAxis)
 					.append("text")
 	        /*.attr("class", "x label")*/
-	        .attr("x", width-110)
+	        .attr("x", width-200)
 	        .attr("y", 40)
 	        .style("text-anchor", "end")
 	        .text("Number of College Graduates");

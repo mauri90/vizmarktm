@@ -705,6 +705,8 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				*/
 				circles.attr("cx", function(d){return xScale(d[xColumn]);})
 					.attr("cy", function(d){return yScale(d[yColumn]);})
+					.attr("rawX", function(d){return d[xColumn];})
+					.attr("rawY", function(d){return d[yColumn];})
 					.attr("r", function(d){return Math.log(Math.sqrt(rScale(d[rColumn])))*1.5})
 					.attr("name", function(d){return d[nameColumn];})
 					.attr("fill", function(d){return dotColor(d[colorColumn]);})
@@ -715,35 +717,15 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.on("mouseout", function(d){
 						tip.hide(d);
 					})
-					.on("click", function(d){
-						// Determine if pie is visible
-						var active = svgPie.active ? false : true;
-
-						// Hide or show pie
-						if(active) {
-							svgPie.style("visibility", "visible");
-							pieDiv.style("z-index", "10");
-						} else {
-							svgPie.style("visibility", "hidden");
-							pieDiv.style("z-index", "-1");
-						}
-						svgPie.active = active;
-
-						// Position pieDiv div in center of scatterplot
-						// var centerPieX = leftpad + (width - rightpad - leftpad)/2 + (pieWidth/2) + 50;
-						// var centerPieY = toppad + (height - bottompad - toppad)/2;
-						var centerPieX = 150 + (850 - 85 - 150)/2 + (200/2) + 50;
-						var centerPieY = 10 + (550 - 45 - 10)/2;
-						pieDiv.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
-					});
-
-				svg.on("click", function(d){
-					if (event.target !== this)
-					  return;
-					svgPie.style("visibility", "hidden");
-					pieDiv.style("z-index", "-1");
-					svgPie.active = false;
-				});
+					.on("click", function(){
+									console.log("Drawing pie chart"); 
+									circles.style("opacity", 0.2); 
+									svg.selectAll(".dot").remove();
+									svg.selectAll(".axis").remove();
+									tip.style("opacity", 0);
+									console.log("here: "+d3.select(this).attr("cx"));
+									console.log("here raw value: "+d3.select(this).attr("rawY"));
+									drawPieChart(d3.select(this).attr("rawY"), d3.select(this).attr("fill"), d3.select(this).attr("name"))});
 					
 				circles.call(tip);
 				/*circles.call(tip2);*/
@@ -951,6 +933,94 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
         	.selectAll("text.ylabel")
         	.text(axisNames[yAxy] === "GDP" ? axisNames[yAxy] + " Millions ($)"
         		: axisNames[yAxy] + " ($)");
+			}
+			/**
+			*Draw a pie chart given a selected point, color in 
+			*the current SVG element
+			*/
+			function drawPieChart(selected, selectedColor, selectedName){
+				
+				//Set pie chart radius relative to svg window size
+				var radius = width / 8;
+				
+				//create background color as a compliment of selected color
+				var colorCompliment = (parseInt("0xffffff") - parseInt("0x"+(selectedColor).substring(1))).toString(16);
+				var colorPieChart = d3.scale.ordinal().range([selectedColor, "#"+colorCompliment]);
+					
+				//select current svg element and add pie chart to it
+				var svg = d3.select('#area2').select("svg")
+					.append('svg')
+					.attr('width', width)
+					.attr('height', height)
+					.append('g')
+					.attr("class", "pie")
+					.attr('transform', 'translate('+(width / 1.5) + ',' + (height / 2) + ')')
+					.on("click", function(){console.log("Removing pie chart"); 
+						drawScatterGraph(inputData);
+						svg.remove();})
+					.style("opacity", 0.9);
+					
+				//calculate total of y-axis values and use them as total value in pie chart
+				var total = 0;
+				inputData.forEach(function(d){
+						total = total + d[yColumn];});
+					
+					console.log("total population is: "+total);
+					console.log("selected amount is: "+selected);
+					console.log("selected color is: "+parseInt("0x"+(selectedColor).substring(1)));
+					console.log("selected color compliment is: "+colorCompliment);
+					
+					var marketShare = Math.round((selected / total) * 10000)/100;
+				
+				//create new data array from selected point y-value and sum of all points y-value
+				var dataset1 = [{label: 'target',population: selected},{label: 'Other', population: (total-selected)}]; 
+					
+				var borderPath = svg.append("rect")
+				  .attr("x", 0)
+				  .attr("y", 0)
+				  .attr("class", "pieChartFrame")
+				  .attr("height", height)
+				  .attr("width", width/2)
+				  .style("stroke", "black")
+				  .style("fill", "none")
+				  .style("stroke-width", 5)
+				  .attr('transform', 'translate('+-(width / 4) + ',' + -(height / 2) + ')');
+				  
+				svg.append("text")
+					.attr("x", 20)
+					.attr("y", 0)
+					.attr("dy", ".35em")
+					.text(""+selectedName+"")
+					.attr('transform', 'translate('+-(width / 5) + ',' + -(height / 3) + ')');
+					
+				svg.append("text")
+					.attr("x", 20)
+					.attr("y", 0)
+					.attr("dy", ".35em")
+					.text(""+marketShare+"% of total")
+					.attr('transform', 'translate('+-(width / 5) + ',' +(height / 3) + ')');
+				 
+				var arc = d3.svg.arc()
+					.outerRadius(radius);
+				
+				//create a pie chart
+				var pie = d3.layout.pie()
+					.value(function(d) {return d.population;})
+					.sort(null);
+					
+				var path = svg.selectAll('path')
+					.data(pie(dataset1))
+					.enter()
+					.append('path')
+					.attr('d', arc)
+					.attr('fill', function(d, i) {
+						return colorPieChart(d.data.label);
+					})
+					.attr("stroke-width", 50);
+					
+				
+			
+			
 			}
 			 
 			drawScatterGraph(inputData);

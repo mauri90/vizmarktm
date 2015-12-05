@@ -122,7 +122,12 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 	
 	<body>
 		
-	
+		<div id="chart">
+			<svg id="svgChart">
+				<g id="groupChart"></g>
+			</svg>
+		</div>
+		
 		<div class="row" id="titleRow">
 		<div class="col-md-2" id="heading" style="padding-left: 80px">
 			
@@ -624,7 +629,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				  });*/
 
 			 /*var pieRadius = 100;
-			 var tooltip = d3.select("body")
+			 var pieDiv = d3.select("body")
 			 	.append("svg:svg")
 			 	.append('g')
 			 	.style("position", "absolute")
@@ -639,17 +644,31 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				var pieHeight = 200;
 				var pieRadius = Math.min(pieWidth, pieHeight) / 2;
 
-				var tooltip = d3.select("body")
-					.append("div")
+				// var pieDiv = d3.select("body")
+				// 	.append("div")
+				// 	.attr("class", "pie")
+				// 	.style("position", "absolute")
+				// 	.style("z-index", "10");
+
+				var pieDiv = d3.select("#chart")
 					.attr("class", "pie")
 					.style("position", "absolute")
 					.style("z-index", "10");
 
-				var svgPie = d3.select(".pie")
-				  .append('svg')
+				// var svgPie = d3.select(".pie")
+				//   .append('svg')
+				//   .attr('width', pieWidth)
+				//   .attr('height', pieHeight)
+				//   .append('g')
+				//   .attr('transform', 'translate(' + (pieWidth / 2) + 
+				//     ',' + (pieHeight / 2) + ')')
+				//   .style("visibility", "hidden");
+
+				d3.select("#svgChart")
 				  .attr('width', pieWidth)
-				  .attr('height', pieHeight)
-				  .append('g')
+				  .attr('height', pieHeight);
+
+				var svgPie = d3.select("#groupChart")
 				  .attr('transform', 'translate(' + (pieWidth / 2) + 
 				    ',' + (pieHeight / 2) + ')')
 				  .style("visibility", "hidden");
@@ -703,15 +722,19 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 						// Hide or show pie
 						if(active) {
 							svgPie.style("visibility", "visible");
+							pieDiv.style("z-index", "10");
 						} else {
 							svgPie.style("visibility", "hidden");
+							pieDiv.style("z-index", "-1");
 						}
 						svgPie.active = active;
 
-						// Position tooltip div in center of scatterplot
-						var centerPieX = leftpad + (width - rightpad - leftpad)/2 + (pieWidth/2) + 50;
-						var centerPieY = toppad + (height - bottompad - toppad)/2;
-						tooltip.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
+						// Position pieDiv div in center of scatterplot
+						// var centerPieX = leftpad + (width - rightpad - leftpad)/2 + (pieWidth/2) + 50;
+						// var centerPieY = toppad + (height - bottompad - toppad)/2;
+						var centerPieX = 150 + (850 - 85 - 150)/2 + (200/2) + 50;
+						var centerPieY = 10 + (550 - 45 - 10)/2;
+						pieDiv.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
 					})
 					;
 					

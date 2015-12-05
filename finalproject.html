@@ -735,8 +735,15 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 						var centerPieX = 150 + (850 - 85 - 150)/2 + (200/2) + 50;
 						var centerPieY = 10 + (550 - 45 - 10)/2;
 						pieDiv.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
-					})
-					;
+					});
+
+				svg.on("click", function(d){
+					if (event.target !== this)
+					  return;
+					svgPie.style("visibility", "hidden");
+					pieDiv.style("z-index", "-1");
+					svgPie.active = false;
+				});
 					
 				circles.call(tip);
 				/*circles.call(tip2);*/
@@ -832,7 +839,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					d3.select("#slider")
 						.on("input", function(){
 							var tempData = ""+Math.round(reverseYear(this.value));
-							console.log("slider moved to: "+this.value); 
+							//console.log("slider moved to: "+this.value); 
 							textYear.text(tempData);
 							
 							/*inputData = tempData;*/

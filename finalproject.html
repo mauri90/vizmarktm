@@ -138,8 +138,7 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
     line-height: 1;
 	  font-weight: bold;
 	  padding: 8px;  
-	  border-radius: 2px;
-	  
+	  border-radius: 2px;	  
   }
 
 </style>
@@ -633,18 +632,18 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.attr("height", height);	
 
 			// Pie chart tooltip showing information about segments
-			var pietooltip = d3.select('#chart') 
-			  .append('div')         
-			  .attr('class', 'pietooltip');  
+			// var pietooltip = d3.select('#chart') 
+			//   .append('div')         
+			//   .attr('class', 'pietooltip');  
 			              
-			pietooltip.append('div')     
-			  .attr('class', 'label'); 
+			// pietooltip.append('div')     
+			//   .attr('class', 'label'); 
 			     
-			pietooltip.append('div')    
-			  .attr('class', 'count');
+			// pietooltip.append('div')    
+			//   .attr('class', 'count');
 
-			pietooltip.append('div')       
-			  .attr('class', 'percent'); 
+			// pietooltip.append('div')       
+			//   .attr('class', 'percent'); 
 
 			/* We describe the function that will be used to draw our scatter plot. We also introduce all the relevant styles here that the user will perceive */
 			function drawScatterGraph(data){
@@ -729,20 +728,19 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				  });
 
 				// Hover event for pie chart to show tooltip
-				path.on('mouseover', function(d) {             
-            var total = d3.sum(data.map(function(d) { 
-              return d["Degrees"];                        
-            }));                                                        
-            var percent = Math.round(1000 * d.data["Degrees"] / total) / 10;
-            pietooltip.select('.label').html(d.data["Industry"]);       
-            pietooltip.select('.count').html(d.data["Degrees"]);        
-            pietooltip.select('.percent').html(percent + '%');       
-            pietooltip.style('display', 'block');          
-          });                                                          
-          
-          path.on('mouseout', function() {                              
-            pietooltip.style('display', 'none');                        
-          });  
+				// path.on('mouseover', function(d) {             
+    //       var total = d3.sum(data.map(function(d) { 
+    //         return d["Degrees"];                        
+    //       }));                                                        
+    //       var percent = Math.round(1000 * d.data["Degrees"] / total) / 10;
+    //       pietooltip.select('.label').html(d.data["Industry"]);       
+    //       pietooltip.select('.count').html(d.data["Degrees"]);        
+    //       pietooltip.select('.percent').html(percent + '%');       
+    //       pietooltip.style('display', 'block');          
+    //     });                                                               
+    //     path.on('mouseout', function() {                              
+    //       pietooltip.style('display', 'none');                        
+    //     });  
 				
 				/*svg.select("axis").call(yAxis);*/
 				
@@ -764,40 +762,49 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 					.attr("fill", function(d){return dotColor(d[colorColumn]);})
 					.attr("transform", "translate("+leftpad+", "+(toppad)+")")
 					.on("mouseover", function(d){
+						svgPie.style("visibility", "visible");
+						//pieDiv.style("top", (height/2)+"px").style("left",(width/2)+"px");
+						pieDiv.style("top", (event.pageY-180)+"px").style("left",(event.pageX+155)+"px");
 						tip.show(d);
 					})
 					.on("mouseout", function(d){
+						svgPie.style("visibility", "hidden");
 						tip.hide(d);
 					})
-					.on("click", function(d){
-						// Determine if pie is visible
-						var active = svgPie.active ? false : true;
+					// .on("click", function(d){
+					// 	// Determine if pie is visible
+					// 	var active = svgPie.active ? false : true;
 
-						// Hide or show pie
-						if(active) {
-							svgPie.style("visibility", "visible");
-							pieDiv.style("z-index", "10");
-						} else {
-							svgPie.style("visibility", "hidden");
-							pieDiv.style("z-index", "-1");
-						}
-						svgPie.active = active;
+					// 	// Hide or show pie
+					// 	if(active) {
+					// 		svgPie.style("visibility", "visible");
+					// 		pieDiv.style("z-index", "10");
+					// 		svg.style("opacity", "0");
+					// 	} else {
+					// 		svgPie.style("visibility", "hidden");
+					// 		pieDiv.style("z-index", "-1");
+					// 		svg.style("opacity", "1");
+					// 	}
+					// 	svgPie.active = active;
 
-						// Position pieDiv div in center of scatterplot
-						var centerPieX = leftpad + (width - rightpad - leftpad)/2 + (pieWidth/2) + 50;
-						var centerPieY = toppad + (height - bottompad - toppad)/2;
-						// var centerPieX = 150 + (850 - 85 - 150)/2 + (200/2) + 50;
-						// var centerPieY = 10 + (550 - 45 - 10)/2;
-						pieDiv.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
-					});
+					// 	// Position pieDiv div in center of scatterplot
+					// 	var centerPieX = leftpad + (width - rightpad - leftpad)/2 + (pieWidth/2) + 50;
+					// 	var centerPieY = toppad + (height - bottompad - toppad)/2;
+					// 	// var centerPieX = 150 + (850 - 85 - 150)/2 + (200/2) + 50;
+					// 	// var centerPieY = 10 + (550 - 45 - 10)/2;
+					// 	pieDiv.style("top", (centerPieY)+"px").style("left",(centerPieX)+"px");
+					// })
+					;
 
-				svg.on("click", function(d){
-					if (event.target !== this)
-					  return;
-					svgPie.style("visibility", "hidden");
-					pieDiv.style("z-index", "-1");
-					svgPie.active = false;
-				});
+				// Make SVG clickable to hide pie chart, if visible
+				// svg.on("click", function(d){
+				// 	if (event.target !== this)
+				// 	  return;
+				// 	svgPie.style("visibility", "hidden");
+				// 	pieDiv.style("z-index", "-1");
+				// 	svgPie.active = false;
+				// 	svg.style("opacity", "1");	
+				// });
 					
 				circles.call(tip);
 				/*circles.call(tip2);*/

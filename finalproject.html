@@ -119,8 +119,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 	.dot {
       stroke: #000;
   }
-<<<<<<< HEAD
-=======
 
   #chart {
   	position: relative;
@@ -146,7 +144,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 	  border-radius: 2px;	  
   }
 
->>>>>>> d27a3723e57ae30e3d9242b29923b8b17becdb2f
 </style>
 </head>
 	
@@ -612,11 +609,9 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 			var svg = d3.select("#area2").append("svg")
 					.attr("width", width)
 					.attr("height", height);	
-<<<<<<< HEAD
 					
 			/* We describe the function that will be used to draw our scatter plot. We also introduce all the relevant
 			styles here that the user will perceive */
-=======
 
 			// Pie chart tooltip showing information about segments
 			// var pietooltip = d3.select('#chart') 
@@ -633,7 +628,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 			//   .attr('class', 'percent'); 
 
 			/* We describe the function that will be used to draw our scatter plot. We also introduce all the relevant styles here that the user will perceive */
->>>>>>> d27a3723e57ae30e3d9242b29923b8b17becdb2f
 			function drawScatterGraph(data){
 				yColumn = d3.select("#y-axis1").node().value;
 				yScale.domain([0, d3.max(inputData, function(d){return d[yColumn];})])
@@ -677,8 +671,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				  .attr('fill', function(d, i) { 
 				    return dotColor(d.data["Industry"]);
 				  });
-<<<<<<< HEAD
-=======
 
 				// Hover event for pie chart to show tooltip
 				// path.on('mouseover', function(d) {             
@@ -694,7 +686,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
     //     path.on('mouseout', function() {                              
     //       pietooltip.style('display', 'none');                        
     //     });  
->>>>>>> d27a3723e57ae30e3d9242b29923b8b17becdb2f
 				
 				/*svg.select("axis").call(yAxis);*/
 				
@@ -743,10 +734,8 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 						svg.selectAll("circle").style("opacity", 1);
 						d3.selectAll(".axis").style("opacity", 1);
 					})
-<<<<<<< HEAD
 					.on("click", function(){
 									});
-=======
 					// .on("click", function(d){
 					// 	// Determine if pie is visible
 					// 	var active = svgPie.active ? false : true;
@@ -781,7 +770,6 @@ features imbedded in the scatter plot. The ensuing code creates our visualizatio
 				// 	svgPie.active = false;
 				// 	svg.style("opacity", "1");	
 				// });
->>>>>>> d27a3723e57ae30e3d9242b29923b8b17becdb2f
 					
 				circles.call(tip);
 				/*circles.call(tip2);*/
